@@ -7,7 +7,7 @@ import mamaPajama.*;
 
 PVector[] pts;
 String[] test;
-String a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent venenatis sit amet nibh non congue. Nulla tristique molestie consectetur. Donec fringilla vel mi sit amet sagittis. Donec consectetur felis ac facilisis eleifend. Vestibulum sed porttitor diam. Curabitur nec urna at erat mollis facilisis ac scelerisque dolor. Proin consectetur ligula felis, sed rutrum felis commodo nec. Phasellus orci velit, pharetra ac laoreet sit amet, gravida at neque. Sed lobortis ut ligula nec consectetur. Suspendisse non convallis nisi, ut sagittis orci.";
+String a = "Lorem    ipsum  dolor sit amet, consectetur   adipiscing elit. Praesent venenatis sit amet nibh non congue. Nulla tristique molestie consectetur. Donec fringilla vel mi sit amet sagittis. Donec consectetur felis ac facilisis eleifend. Vestibulum sed porttitor diam. Curabitur nec urna at erat mollis facilisis ac scelerisque dolor. Proin consectetur ligula felis, sed rutrum felis commodo nec. Phasellus orci velit, pharetra ac laoreet sit amet, gravida at neque. Sed lobortis ut ligula nec consectetur. Suspendisse non convallis nisi, ut sagittis orci.";
 PFont f;
 float txtW = 400f;
 int sz = 14;

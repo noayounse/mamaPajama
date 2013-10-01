@@ -1,12 +1,14 @@
 package mamaPajama;
 
+import processing.core.PApplet;
+
 /**
  * Helper functions for MamaPajama
  * 
  * @author nyounse
  * 
  */
-public class SchoolYard {
+public class SchoolYard extends MamaPajama{
 	/**
 	 * This breaks up a color int into a float[]
 	 * 
@@ -41,7 +43,8 @@ public class SchoolYard {
 	/**
 	 * Constrains a float between two values
 	 * 
-	 * @param floatIn The float in question
+	 * @param floatIn
+	 *            The float in question
 	 * @param low
 	 *            The min value
 	 * @param high
@@ -59,4 +62,23 @@ public class SchoolYard {
 		floatIn = floatIn <= high ? floatIn : high;
 		return floatIn;
 	} // end constrain
+
+	/**
+	 * This will just find the min and max of a double[]
+	 * 
+	 * @param numbers
+	 *            The double[] of data
+	 * @return A double[]. [0] = min [1] = max
+	 */
+	public static double[] findMinMax(double[] numbers) {
+		double[] minMax = new double[2];
+		minMax[0] = numbers[0];
+		minMax[1] = minMax[0];
+		for (double d : numbers) {
+			minMax[0] = minMax[0] < d ? minMax[0] : d;
+			minMax[1] = minMax[1] > d ? minMax[1] : d;
+		}
+		return minMax;
+	} // end findMinMax	
 } // end class SchoolYard
+

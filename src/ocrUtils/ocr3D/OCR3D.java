@@ -1,6 +1,7 @@
 package ocrUtils.ocr3D;
 
 import java.util.ArrayList;
+import java.awt.geom.*;
 
 import ocrUtils.OCRUtils;
 import ocrUtils.Sandbox;
@@ -128,20 +129,22 @@ public class OCR3D extends OCRUtils {
 	 */
 	public static void drawSegment(PVector segmentTop, PVector segmentBottom,
 			float extendAmount, boolean drawPoints) {
+		PVector segTop = segmentTop.get();
+		PVector segBot = segmentBottom.get();
 		if (drawPoints) {
 			float ptAmt = extendAmount / 2 > 5 ? extendAmount / 2 : 5;
-			drawPoint(segmentTop, ptAmt);
-			drawPoint(segmentBottom, ptAmt);
+			drawPoint(segTop, ptAmt);
+			drawPoint(segBot, ptAmt);
 		}
 		if (extendAmount > 0) {
-			PVector dir = PVector.sub(segmentTop, segmentBottom);
+			PVector dir = PVector.sub(segTop, segBot);
 			dir.normalize();
 			dir.mult(extendAmount);
-			segmentTop.add(dir);
-			segmentBottom.sub(dir);
+
+			segTop.add(dir);
+			segBot.sub(dir);
 		}
-		parent.line(segmentTop.x, segmentTop.y, segmentTop.z, segmentBottom.x,
-				segmentBottom.y, segmentBottom.z);
+		parent.line(segTop.x, segTop.y, segTop.z, segBot.x, segBot.y, segBot.z);
 	} // end drawSegment
 
 	/*
@@ -444,14 +447,19 @@ public class OCR3D extends OCRUtils {
 		return tempPoint7;
 	} // end rotate3d for rotating around a segment
 
-	// for a parallel line it will return null?  maybe
+	// for a parallel line it will return null? maybe
 	// http://compgroups.net/comp.soft-sys.matlab/distance-between-2-lines-in-3d-space/872966
 	/**
 	 * This will find the closest connection between two nonparallel lines
-	 * @param p1 First point of segment 1
-	 * @param p2 Second point of segment 1
-	 * @param p3 First point of segment 2
-	 * @param p4 Second point of segment 2
+	 * 
+	 * @param p1
+	 *            First point of segment 1
+	 * @param p2
+	 *            Second point of segment 1
+	 * @param p3
+	 *            First point of segment 2
+	 * @param p4
+	 *            Second point of segment 2
 	 * @return An ArrayList of PVectors with the two connection points
 	 */
 	public static ArrayList<PVector> findNearestLineConnection(PVector p1,
@@ -487,6 +495,142 @@ public class OCR3D extends OCRUtils {
 		pts.add(y);
 		return pts;
 	} // end findNearestLineConnection
+
+	/**
+	 * This function will find the closest point on a line from a given point.
+	 * It may not be the most efficient method, but eh..
+	 * 
+	 * @param targetPoint
+	 *            The PVector in question
+	 * @param p1
+	 *            The first PVector point that defines the line
+	 * @param p2
+	 *            The second PVector point that defines the line
+	 * @return The PVector of the closest point
+	 */
+	public static PVector findPointLineConnection(PVector targetPoint,
+			PVector p1, PVector p2) {
+		PVector closest = targetPoint.get();
+		PVector ln = PVector.sub(p1, p2);
+		if (ln.mag() == 0)
+			return null;
+		PVector right = (Sandbox.makePlaneVectors(ln)).get(1);
+		PVector targetPoint2 = PVector.add(targetPoint, right);
+		ArrayList<PVector> connection = findNearestLineConnection(p1, p2,
+				targetPoint, targetPoint2);
+		if (connection.get(0).x == targetPoint.x
+				&& connection.get(0).y == targetPoint.y
+				&& connection.get(0).z == targetPoint.z)
+			closest = connection.get(1);
+		else
+			closest = connection.get(0);
+		return closest;
+	} // end findPointLineConnection
+
+	/**
+	 * Will find the intersection of a segment and segment in 2d space. This
+	 * will return null if the segments do not intersect.
+	 * 
+	 * @param pt1
+	 *            First point of the segment
+	 * @param pt2
+	 *            Second point of the segment
+	 * @param pt3
+	 *            First point of the segment
+	 * @param pt4
+	 *            Second point of the segment
+	 * @return
+	 */
+	public static PVector findSegmentSegmentIntersection(PVector pt1,
+			PVector pt2, PVector pt3, PVector pt4) {
+		PVector intersection = null;
+		Line2D.Float lnA = new Line2D.Float(pt1.x, pt1.y, pt2.x, pt2.y);
+		Line2D.Float lnB = new Line2D.Float(pt3.x, pt3.y, pt4.x, pt4.y);
+		if (lnA.intersectsLine(lnB)) {
+			Point2D intersectionPoint = getIntersectionPoint(lnA, lnB);
+			if (intersectionPoint != null) {
+				if (lnA.contains(intersectionPoint))
+					intersection = new PVector(
+							(float) intersectionPoint.getX(),
+							(float) intersectionPoint.getY());
+			}
+		}
+		return intersection;
+	} // end findSegmentSegmentIntersection
+
+	/**
+	 * Will find the intersection of a line and segment in 2d space
+	 * 
+	 * @param pt1
+	 *            First point of the ray
+	 * @param pt2
+	 *            Second point of the ray
+	 * @param pt3
+	 *            First point of the segment
+	 * @param pt4
+	 *            Second point of the segment
+	 * @param projectionOk
+	 *            Whether or not it is ok to project from the line. If not it
+	 *            will return null if the segments do not intersect
+	 * @return
+	 */
+	public static PVector findRaySegmentIntersection(PVector pt1, PVector pt2,
+			PVector pt3, PVector pt4) {
+		PVector intersection = null;
+		Line2D.Float lnA = new Line2D.Float(pt1.x, pt1.y, pt2.x, pt2.y);
+		Line2D.Float lnB = new Line2D.Float(pt3.x, pt3.y, pt4.x, pt4.y);
+
+		ArrayList<PVector> intersectionTest = findNearestLineConnection(pt1,
+				pt2, pt3, pt4);
+
+		if (intersectionTest != null && intersectionTest.size() == 2) {
+			PVector tempIntersection = intersectionTest.get(0);
+			float x1, x2, y1, y2;
+			if (pt3.x < pt4.x) {
+				x1 = pt3.x;
+				x2 = pt4.x;
+			} else {
+				x2 = pt3.x;
+				x1 = pt4.x;
+			}
+			if (pt3.y < pt4.y) {
+				y1 = pt3.y;
+				y2 = pt4.y;
+			} else {
+				y2 = pt3.y;
+				y1 = pt4.y;
+			}
+
+			if (tempIntersection.x >= x1 && tempIntersection.x <= x2
+					&& tempIntersection.y >= y1 && tempIntersection.y <= y2) {
+				intersection = tempIntersection;
+			}
+			
+		}
+
+		return intersection;
+	} // end findRaySegmentIntersection
+
+	// from https://community.oracle.com/thread/1264395?start=0&tstart=0
+	private static Point2D.Float getIntersectionPoint(Line2D.Float line1,
+			Line2D.Float line2) {
+		if (!line1.intersectsLine(line2))
+			return null;
+		double px = line1.getX1(), py = line1.getY1(), rx = line1.getX2() - px, ry = line1
+				.getY2() - py;
+		double qx = line2.getX1(), qy = line2.getY1(), sx = line2.getX2() - qx, sy = line2
+				.getY2() - qy;
+		double det = sx * ry - sy * rx;
+		if (det == 0) {
+			return null;
+		} else {
+			double z = (sx * (qy - py) + sy * (px - qx)) / det;
+			if (z == 0 || z == 1)
+				return null; // intersection at end point!
+			return new Point2D.Float((float) (px + z * rx), (float) (py + z
+					* ry));
+		}
+	} // end getIntersectionPoint
 
 	/**
 	 * This function will find the point where a segment/line intersects with a

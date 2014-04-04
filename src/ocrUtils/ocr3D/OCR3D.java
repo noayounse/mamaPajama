@@ -541,7 +541,7 @@ public class OCR3D extends OCRUtils {
 	 *            Second point of the segment
 	 * @return
 	 */
-	public static PVector findSegmentSegmentIntersection(PVector pt1,
+	public static PVector find2DSegmentSegmentIntersection(PVector pt1,
 			PVector pt2, PVector pt3, PVector pt4) {
 		PVector intersection = null;
 		Line2D.Float lnA = new Line2D.Float(pt1.x, pt1.y, pt2.x, pt2.y);
@@ -549,14 +549,104 @@ public class OCR3D extends OCRUtils {
 		if (lnA.intersectsLine(lnB)) {
 			Point2D intersectionPoint = getIntersectionPoint(lnA, lnB);
 			if (intersectionPoint != null) {
-				if (lnA.contains(intersectionPoint))
-					intersection = new PVector(
-							(float) intersectionPoint.getX(),
-							(float) intersectionPoint.getY());
+				intersection = new PVector((float) intersectionPoint.getX(),
+						(float) intersectionPoint.getY());
 			}
 		}
 		return intersection;
-	} // end findSegmentSegmentIntersection
+	}// end find2DSegmentSegmentIntersection
+
+	// from https://community.oracle.com/thread/1264395?start=0&tstart=0
+	private static Point2D.Float getIntersectionPoint(Line2D.Float line1,
+			Line2D.Float line2) {
+		if (!line1.intersectsLine(line2))
+			return null;
+		double px = line1.getX1(), py = line1.getY1(), rx = line1.getX2() - px, ry = line1
+				.getY2() - py;
+		double qx = line2.getX1(), qy = line2.getY1(), sx = line2.getX2() - qx, sy = line2
+				.getY2() - qy;
+		double det = sx * ry - sy * rx;
+		if (det == 0) {
+			return null;
+		} else {
+			double z = (sx * (qy - py) + sy * (px - qx)) / det;
+			if (z == 0 || z == 1)
+				return null; // intersection at end point!
+			return new Point2D.Float((float) (px + z * rx), (float) (py + z
+					* ry));
+		}
+	} // end getIntersectionPoint
+
+	/**
+	 * This will check whether or not a point is on a segment given a tolerance
+	 * 
+	 * @param pt1
+	 *            The point in question
+	 * @param pt2
+	 *            The first point of the segment
+	 * @param pt3
+	 *            The second point of the segment
+	 * @param tolerance
+	 *            The amount of tolerance allowed.. because the world is not a
+	 *            perfect place
+	 * @return true if the point is on the segment
+	 */
+	public static boolean pointIsOnSegment(PVector pt1, PVector pt2,
+			PVector pt3, float tolerance) {
+		if (pointIsOnLine(pt1, pt2, pt3, tolerance)) {
+			float x1, x2, y1, y2, z1, z2;
+			if (pt2.x < pt3.x) {
+				x1 = pt2.x - tolerance;
+				x2 = pt3.x + tolerance;
+			} else {
+				x2 = pt2.x - tolerance;
+				x1 = pt3.x + tolerance;
+			}
+			if (pt2.y < pt3.y) {
+				y1 = pt2.y - tolerance;
+				y2 = pt3.y + tolerance;
+			} else {
+				y2 = pt2.y - tolerance;
+				y1 = pt3.y + tolerance;
+			}
+			if (pt2.z < pt3.z) {
+				z1 = pt2.z - tolerance;
+				z2 = pt3.z + tolerance;
+			} else {
+				z2 = pt2.z - tolerance;
+				z1 = pt3.z + tolerance;
+			}
+			if (pt1.x >= x1 && pt1.x <= x2 && pt1.y >= y1 && pt1.y <= y2
+					&& pt1.z >= z1 && pt1.z <= z2) {
+				return true;
+			}
+		}
+		return false;
+	} // end pointIsOnSegment
+
+	/**
+	 * This will check whether or not a point is on a line given a tolerance
+	 * 
+	 * @param pt1
+	 *            The point in question
+	 * @param pt2
+	 *            The first point of the line
+	 * @param pt3
+	 *            The second point of the line
+	 * @param tolerance
+	 *            Given a bit of tolerance if you want
+	 * @return true if the point is on the line
+	 */
+	public static boolean pointIsOnLine(PVector pt1, PVector pt2, PVector pt3,
+			float tolerance) {
+		PVector dirA = PVector.sub(pt1, pt3);
+		PVector dirB = PVector.sub(pt1, pt2);
+		PVector cross = new PVector();
+		PVector.cross(dirA, dirB, cross);
+		if (cross.mag() <= tolerance)
+			return true;
+		return false;
+	} // end pointIsOnLine
 
 	/**
 	 * Will find the intersection of a line and segment in 2d space
@@ -574,7 +664,7 @@ public class OCR3D extends OCRUtils {
 	 *            will return null if the segments do not intersect
 	 * @return
 	 */
-	public static PVector findRaySegmentIntersection(PVector pt1, PVector pt2,
+	public static PVector find2DRaySegmentIntersection(PVector pt1, PVector pt2,
 			PVector pt3, PVector pt4) {
 		PVector intersection = null;
 		Line2D.Float lnA = new Line2D.Float(pt1.x, pt1.y, pt2.x, pt2.y);
@@ -605,32 +695,11 @@ public class OCR3D extends OCRUtils {
 					&& tempIntersection.y >= y1 && tempIntersection.y <= y2) {
 				intersection = tempIntersection;
 			}
-			
+
 		}
 
 		return intersection;
-	} // end findRaySegmentIntersection
-
-	// from https://community.oracle.com/thread/1264395?start=0&tstart=0
-	private static Point2D.Float getIntersectionPoint(Line2D.Float line1,
-			Line2D.Float line2) {
-		if (!line1.intersectsLine(line2))
-			return null;
-		double px = line1.getX1(), py = line1.getY1(), rx = line1.getX2() - px, ry = line1
-				.getY2() - py;
-		double qx = line2.getX1(), qy = line2.getY1(), sx = line2.getX2() - qx, sy = line2
-				.getY2() - qy;
-		double det = sx * ry - sy * rx;
-		if (det == 0) {
-			return null;
-		} else {
-			double z = (sx * (qy - py) + sy * (px - qx)) / det;
-			if (z == 0 || z == 1)
-				return null; // intersection at end point!
-			return new Point2D.Float((float) (px + z * rx), (float) (py + z
-					* ry));
-		}
-	} // end getIntersectionPoint
+	} // end find2DRaySegmentIntersection
 
 	/**
 	 * This function will find the point where a segment/line intersects with a

@@ -338,7 +338,7 @@ public class OCRUtils {
 	} // end countOccurrences
 
 	/**
-	 * this function will get the file names for things that arent directories
+	 * this function will get the file names for things that aren't directories
 	 * 
 	 * @param fileDirectory
 	 *            .. use an actual path, most likely sketchPath("") + relative
@@ -346,24 +346,55 @@ public class OCRUtils {
 	 * @param goDeep
 	 *            Whether or not to go deeper into the system or stay at this
 	 *            folder level
-	 * @return
+	 * @return String array of files
 	 */
 	public static String[] getFileNames(String fileDirectory, boolean goDeep) {
+		return getDirectoryObjectNames(fileDirectory, goDeep, true);
+	} // end getFileNames
+
+	/**
+	 * this function will get the file names for things that are directories
+	 * 
+	 * @param fileDirectory
+	 *            .. use an actual path, most likely sketchPath("") + relative
+	 *            directory
+	 * @param goDeep
+	 *            Whether or not to go deeper into the system or stay at this
+	 *            folder level
+	 * @return String array of files
+	 */
+	public static String[] getDirectoryNames(String fileDirectory, boolean goDeep) {
+		return getDirectoryObjectNames(fileDirectory, goDeep, false);
+	} // end getFileNames
+
+	private static String[] getDirectoryObjectNames(String fileDirectory, boolean goDeep, boolean filesOnly) {
 		fileDirectory = fileDirectory.trim();
-		if (fileDirectory.charAt(fileDirectory.length() - 1) != '/') fileDirectory += "/";
+		if (fileDirectory.charAt(fileDirectory.length() - 1) != '/')
+			fileDirectory += "/";
 		String[] validFiles = new String[0];
 		try {
 			File file = new File(fileDirectory);
 			if (file.isDirectory()) {
 				String allFiles[] = file.list();
 				for (String thisFile : allFiles) {
-					if (thisFile.length() > 0 && thisFile.toLowerCase().charAt(0) != '.') { // ignore hidden files
+					if (thisFile.length() > 0 && thisFile.toLowerCase().charAt(0) != '.') { // ignore
+																							// hidden
+																							// files
 						File child = new File(fileDirectory + thisFile);
-						if (!child.isDirectory())
+						if ((filesOnly && !child.isDirectory()) || (!filesOnly && child.isDirectory())) {
 							validFiles = (String[]) parent.append(validFiles, fileDirectory + thisFile);
-						else {
+							if (!filesOnly && goDeep) { // when it is only
+														// looking for
+														// directories, goDeep
+														// if necessary
+								String[] childFiles = getDirectoryObjectNames(fileDirectory + thisFile + "/", goDeep, filesOnly);
+								for (String s : childFiles)
+									validFiles = (String[]) parent.append(validFiles, s);
+							}
+						} else { // when it is only looking for files, then
+									// goDeep if necessary
 							if (goDeep) {
-								String[] childFiles = getFileNames(fileDirectory + thisFile + "/", goDeep);
+								String[] childFiles = getDirectoryObjectNames(fileDirectory + thisFile + "/", goDeep, filesOnly);
 								for (String s : childFiles)
 									validFiles = (String[]) parent.append(validFiles, s);
 							}
@@ -375,5 +406,6 @@ public class OCRUtils {
 			System.out.println("error getting file names for directory: " + fileDirectory);
 		}
 		return validFiles;
-	} // end getFileNames
+	} // end getDirectoryObjectNames
+
 } // end class OCRUtils

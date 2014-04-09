@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
+import java.io.File;
 import java.lang.reflect.*;
 import java.util.Map;
 
@@ -60,22 +61,17 @@ public class OCRUtils {
 	 *            A String used for a manual description
 	 */
 	public static void printStatus(String functionName, String notes) {
-		int freeMemory = PApplet.round((float) Runtime.getRuntime()
-				.freeMemory() / 10000) / 10;
-		int totalMemory = PApplet.round((float) Runtime.getRuntime()
-				.totalMemory() / 10000) / 10;
+		int freeMemory = PApplet.round((float) Runtime.getRuntime().freeMemory() / 10000) / 10;
+		int totalMemory = PApplet.round((float) Runtime.getRuntime().totalMemory() / 10000) / 10;
 		String builder = "printStatus:  ";
 		if (functionName.length() > 0)
 			builder += "_function: " + functionName + "  " + builder;
-		builder += "_frame: " + parent.frameCount + "  _frameRate: "
-				+ PApplet.nf(parent.frameRate, 0, 2) + "  _free memory: "
-				+ freeMemory + "  _totalMemory: " + totalMemory;
+		builder += "_frame: " + parent.frameCount + "  _frameRate: " + PApplet.nf(parent.frameRate, 0, 2) + "  _free memory: " + freeMemory + "  _totalMemory: " + totalMemory;
 		if (notes.length() > 0)
 			builder += "\n  _notes: " + notes;
 		try {
 			// print the last few stack traces
-			final StackTraceElement[] ste = Thread.currentThread()
-					.getStackTrace();
+			final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
 			builder += "\n  stack trace:";
 			for (int i = 1; i < 5; i++) {
 				if (i >= ste.length)
@@ -103,8 +99,7 @@ public class OCRUtils {
 	 *            widths
 	 * @return The String[] of the broken up line
 	 */
-	public static String[] splitStringIntoLines(String stringIn,
-			float lineWidthIn, PFont fontIn) {
+	public static String[] splitStringIntoLines(String stringIn, float lineWidthIn, PFont fontIn) {
 		String[] lines = new String[0];
 		parent.textFont(fontIn);
 
@@ -118,9 +113,7 @@ public class OCRUtils {
 			if (broken[i].equals("`")) {
 				lines = (String[]) PApplet.append(lines, builder);
 				builder = broken[i];
-			} else if (parent.textWidth(builder.replace("~", " ").replace("`",
-					"")
-					+ broken[i].replace("~", "").replace("`", "")) <= lineWidthIn) {
+			} else if (parent.textWidth(builder.replace("~", " ").replace("`", "") + broken[i].replace("~", "").replace("`", "")) <= lineWidthIn) {
 				builder += broken[i];
 			} else {
 				lines = (String[]) PApplet.append(lines, builder);
@@ -143,9 +136,7 @@ public class OCRUtils {
 	 * @return Something like 2013-10-15_17-41-23
 	 */
 	public static String getTimeStampWithDate() {
-		String stamp = PApplet.nf(PApplet.year(), 4) + "-"
-				+ PApplet.nf(PApplet.month(), 2) + "-"
-				+ PApplet.nf(PApplet.day(), 2) + "_" + getTimeStamp();
+		String stamp = PApplet.nf(PApplet.year(), 4) + "-" + PApplet.nf(PApplet.month(), 2) + "-" + PApplet.nf(PApplet.day(), 2) + "_" + getTimeStamp();
 		return stamp;
 	} // end getTimeStamp
 
@@ -155,9 +146,7 @@ public class OCRUtils {
 	 * @return Something like 17-41-23
 	 */
 	public static String getTimeStamp() {
-		String stamp = PApplet.nf(PApplet.hour(), 2) + "-"
-				+ PApplet.nf(PApplet.minute(), 2) + "-"
-				+ PApplet.nf(PApplet.second(), 2);
+		String stamp = PApplet.nf(PApplet.hour(), 2) + "-" + PApplet.nf(PApplet.minute(), 2) + "-" + PApplet.nf(PApplet.second(), 2);
 		return stamp;
 	} // end getTimeStamp
 
@@ -204,8 +193,7 @@ public class OCRUtils {
 	 *            float, double, char, and String
 	 * @return The ascending ArrayList of Objects
 	 */
-	public static ArrayList sortObjectArrayListSimple(ArrayList listIn,
-			String paramName) {
+	public static ArrayList sortObjectArrayListSimple(ArrayList listIn, String paramName) {
 		ArrayList newList = new ArrayList();
 		try {
 			if (listIn.size() > 0) {
@@ -267,8 +255,7 @@ public class OCRUtils {
 						sortedPos.put(key + "-" + count, thisObj);
 						count++;
 					}
-					TreeMap<String, Object> result = new TreeMap(
-							String.CASE_INSENSITIVE_ORDER);
+					TreeMap<String, Object> result = new TreeMap(String.CASE_INSENSITIVE_ORDER);
 					result.putAll(sortedPos);
 					sortedPos = result;
 				}
@@ -290,8 +277,7 @@ public class OCRUtils {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("problem sorting list.  listIn.size(): "
-					+ listIn.size() + " and param: " + paramName);
+			System.out.println("problem sorting list.  listIn.size(): " + listIn.size() + " and param: " + paramName);
 			return listIn;
 		}
 		return newList;
@@ -311,8 +297,8 @@ public class OCRUtils {
 	} // end reverseArrayList
 
 	/**
-	 * This will count the number of occurrences of a variable in an ArrayList of
-	 * objects
+	 * This will count the number of occurrences of a variable in an ArrayList
+	 * of objects
 	 * 
 	 * @param listIn
 	 *            The ArrayList of objects
@@ -346,9 +332,48 @@ public class OCRUtils {
 				intDict.sortValues();
 			}
 		} catch (Exception e) {
-			System.out.println("problem getting count for param: " + paramName
-					+ " does param exist?");
+			System.out.println("problem getting count for param: " + paramName + " does param exist?");
 		}
 		return intDict;
 	} // end countOccurrences
+
+	/**
+	 * this function will get the file names for things that arent directories
+	 * 
+	 * @param fileDirectory
+	 *            .. use an actual path, most likely sketchPath("") + relative
+	 *            directory
+	 * @param goDeep
+	 *            Whether or not to go deeper into the system or stay at this
+	 *            folder level
+	 * @return
+	 */
+	public static String[] getFileNames(String fileDirectory, boolean goDeep) {
+		fileDirectory = fileDirectory.trim();
+		if (fileDirectory.charAt(fileDirectory.length() - 1) != '/') fileDirectory += "/";
+		String[] validFiles = new String[0];
+		try {
+			File file = new File(fileDirectory);
+			if (file.isDirectory()) {
+				String allFiles[] = file.list();
+				for (String thisFile : allFiles) {
+					if (thisFile.length() > 0 && thisFile.toLowerCase().charAt(0) != '.') { // ignore hidden files
+						File child = new File(fileDirectory + thisFile);
+						if (!child.isDirectory())
+							validFiles = (String[]) parent.append(validFiles, fileDirectory + thisFile);
+						else {
+							if (goDeep) {
+								String[] childFiles = getFileNames(fileDirectory + thisFile + "/", goDeep);
+								for (String s : childFiles)
+									validFiles = (String[]) parent.append(validFiles, s);
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("error getting file names for directory: " + fileDirectory);
+		}
+		return validFiles;
+	} // end getFileNames
 } // end class OCRUtils

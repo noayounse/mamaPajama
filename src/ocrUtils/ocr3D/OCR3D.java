@@ -82,7 +82,7 @@ public class OCR3D extends OCRUtils {
 	} // end drawPoint
 
 	/**
-	 * This will draw a vector with a simple arrowhead describing the direction
+	 * This will draw a vector with a simple arrowhead describing the direction in 2D
 	 * 
 	 * @param vecIn
 	 *            The PVector to be drawn
@@ -92,23 +92,63 @@ public class OCR3D extends OCRUtils {
 	 * @param arrowSize
 	 *            How big to make the arrowhead lines
 	 */
-	public static void drawVector(PVector vecIn, PVector departurePoint,
-			float arrowSize) {
+	public static void drawVector2D(PVector vecIn, PVector departurePoint, float arrowSize) {
+		drawVector(vecIn, departurePoint, arrowSize, false);
+	} // drawVector3D
+	
+	/**
+	 * This will draw a vector with a simple arrowhead describing the direction in 3D
+	 * 
+	 * @param vecIn
+	 *            The PVector to be drawn
+	 * @param departurePoint
+	 *            The PVector describing the start point of the PVector to be
+	 *            drawn
+	 * @param arrowSize
+	 *            How big to make the arrowhead lines
+	 */
+	public static void drawVector3D(PVector vecIn, PVector departurePoint, float arrowSize) {
+		drawVector(vecIn, departurePoint, arrowSize, true);
+	} // drawVector3D
+
+	private static void drawVector(PVector vecIn, PVector departurePoint, float arrowSize, boolean is3d) {
 		parent.pushMatrix();
-		parent.translate(departurePoint.x, departurePoint.y, departurePoint.z);
-		parent.line(0, 0, 0, vecIn.x, vecIn.y, vecIn.z);
-		ArrayList<PVector> planeVectors = Sandbox.makePlaneVectors(vecIn);
+		if (is3d)
+			parent.translate(departurePoint.x, departurePoint.y, departurePoint.z);
+		else
+			parent.translate(departurePoint.x, departurePoint.y);
+		if (is3d)
+			parent.line(0, 0, 0, vecIn.x, vecIn.y, vecIn.z);
+		else
+			parent.line(0, 0, vecIn.x, vecIn.y);
+
 		PVector pt1 = vecIn.get();
 		PVector direction = vecIn.get();
 		direction.normalize();
 		direction.mult(-1 * arrowSize);
 		pt1.add(direction);
-		planeVectors.get(0).mult(arrowSize);
-		pt1.add(planeVectors.get(0));
-		parent.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
-		planeVectors.get(0).mult(-2);
-		pt1.add(planeVectors.get(0));
-		parent.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
+		if (is3d) {
+			ArrayList<PVector> planeVectors = Sandbox.makePlaneVectors(vecIn);
+			planeVectors.get(0).mult(arrowSize);
+			pt1.add(planeVectors.get(0));
+			parent.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
+			planeVectors.get(0).mult(-2);
+			pt1.add(planeVectors.get(0));
+			parent.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
+		} else {
+			PVector arrow = vecIn.get();
+			arrow.normalize();
+			arrow = rotateUnitVector2D(arrow,(arrow.x != 0 || arrow.y <= 0  ? (float)Math.PI/4 : -(float)Math.PI/4)); // lazy lazy
+			arrow.mult(arrowSize);
+			arrow.add(vecIn);
+			parent.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
+			arrow = vecIn.get();
+			arrow.normalize();
+			arrow = rotateUnitVector2D(arrow, (arrow.x != 0 || arrow.y <= 0 ? 3 * (float)Math.PI/4 : -3 * (float)Math.PI/4));
+			arrow.mult(arrowSize);
+			arrow.add(vecIn);
+			parent.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
+		}
 		parent.popMatrix();
 	} // end drawVector
 
@@ -127,8 +167,7 @@ public class OCR3D extends OCRUtils {
 	 *            Default point size will be the extendAmount / 2 or 5,
 	 *            whichever is bigger
 	 */
-	public static void drawSegment(PVector segmentTop, PVector segmentBottom,
-			float extendAmount, boolean drawPoints) {
+	public static void drawSegment(PVector segmentTop, PVector segmentBottom, float extendAmount, boolean drawPoints) {
 		PVector segTop = segmentTop.get();
 		PVector segBot = segmentBottom.get();
 		if (drawPoints) {
@@ -210,18 +249,12 @@ public class OCR3D extends OCRUtils {
 	public static void drawBoxXYZ(PVector lower, PVector upper, boolean fill) {
 		if (fill) {
 			parent.beginShape();
-			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(
-					upper.x, upper.y, lower.z));
-			drawRectXYZ(new PVector(lower.x, lower.y, upper.z), new PVector(
-					upper.x, upper.y, upper.z));
-			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(
-					upper.x, lower.y, upper.z));
-			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(
-					lower.x, upper.y, upper.z));
-			drawRectXYZ(new PVector(upper.x, upper.y, upper.z), new PVector(
-					lower.x, upper.y, lower.z));
-			drawRectXYZ(new PVector(upper.x, upper.y, upper.z), new PVector(
-					upper.x, lower.y, lower.z));
+			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(upper.x, upper.y, lower.z));
+			drawRectXYZ(new PVector(lower.x, lower.y, upper.z), new PVector(upper.x, upper.y, upper.z));
+			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(upper.x, lower.y, upper.z));
+			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(lower.x, upper.y, upper.z));
+			drawRectXYZ(new PVector(upper.x, upper.y, upper.z), new PVector(lower.x, upper.y, lower.z));
+			drawRectXYZ(new PVector(upper.x, upper.y, upper.z), new PVector(upper.x, lower.y, lower.z));
 			parent.endShape(PApplet.CLOSE);
 		} else {
 			parent.line(lower.x, lower.y, lower.z, upper.x, lower.y, lower.z);
@@ -251,8 +284,7 @@ public class OCR3D extends OCRUtils {
 	 * @param outlineColor
 	 *            The color used to outline the plane
 	 */
-	public static void drawPlane(PVector planePoint, PVector planeNormal,
-			float planeSize, int outlineColor) {
+	public static void drawPlane(PVector planePoint, PVector planeNormal, float planeSize, int outlineColor) {
 		drawPlane(planePoint, planeNormal, planeSize, outlineColor, -1);
 	}
 
@@ -270,12 +302,10 @@ public class OCR3D extends OCRUtils {
 	 * @param fillColor
 	 *            The color to fill the plane
 	 */
-	public static void drawPlane(PVector planePoint, PVector planeNormal,
-			float planeSize, int outlineColor, int fillColor) {
+	public static void drawPlane(PVector planePoint, PVector planeNormal, float planeSize, int outlineColor, int fillColor) {
 		float[] brokenOutlineColor = Sandbox.breakUpColorInt(outlineColor);
 		float[] brokenFillColor = Sandbox.breakUpColorInt(fillColor);
-		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2],
-				brokenOutlineColor[3], brokenOutlineColor[0]);
+		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
 		float planePointLength = 5f;
 		drawPoint(planePoint, planePointLength);
 		ArrayList<PVector> planeVectors = Sandbox.makePlaneVectors(planeNormal);
@@ -300,12 +330,10 @@ public class OCR3D extends OCRUtils {
 		cornerD.add(rt);
 		drawPoint(cornerD, planePointLength);
 		if (fillColor != -1)
-			parent.fill(brokenFillColor[1], brokenFillColor[2],
-					brokenFillColor[3], brokenFillColor[0]);
+			parent.fill(brokenFillColor[1], brokenFillColor[2], brokenFillColor[3], brokenFillColor[0]);
 		else
 			parent.noFill();
-		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2],
-				brokenOutlineColor[3], brokenOutlineColor[0]);
+		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
 		parent.beginShape();
 		parent.vertex(cornerA.x, cornerA.y, cornerA.z);
 		parent.vertex(cornerB.x, cornerB.y, cornerB.z);
@@ -319,13 +347,10 @@ public class OCR3D extends OCRUtils {
 		normalizedNormal.normalize();
 		normalizedNormal.mult(normalLength);
 		otherPoint.add(normalizedNormal);
-		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2],
-				brokenOutlineColor[3], brokenOutlineColor[0]);
-		parent.line(otherPoint.x, otherPoint.y, otherPoint.z, planePoint.x,
-				planePoint.y, planePoint.z);
+		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
+		parent.line(otherPoint.x, otherPoint.y, otherPoint.z, planePoint.x, planePoint.y, planePoint.z);
 		parent.noStroke();
-		parent.fill(brokenOutlineColor[1], brokenOutlineColor[2],
-				brokenOutlineColor[3], brokenOutlineColor[0]);
+		parent.fill(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
 		drawPoint(otherPoint, planePointLength);
 	} // end drawPlane
 
@@ -344,8 +369,7 @@ public class OCR3D extends OCRUtils {
 	 *            How much to rotate around the z axis
 	 * @return The resultant PVector
 	 */
-	public static PVector rotateXYZ(PVector ptIn, PVector originIn,
-			double rotX, double rotY, double rotZ) {
+	public static PVector rotateXYZ(PVector ptIn, PVector originIn, double rotX, double rotY, double rotZ) {
 		double dx = ptIn.x - originIn.x;
 		double dy = ptIn.y - originIn.y;
 		double dz = ptIn.z - originIn.z;
@@ -384,8 +408,7 @@ public class OCR3D extends OCRUtils {
 			zPrime = zStore * Math.cos(rotY) - xStore * Math.sin(rotY);
 		}
 
-		return PVector.add(new PVector((float) xPrime, (float) yPrime,
-				(float) zPrime), originIn);
+		return PVector.add(new PVector((float) xPrime, (float) yPrime, (float) zPrime), originIn);
 	} // end rotateXYZ
 
 	/**
@@ -402,8 +425,7 @@ public class OCR3D extends OCRUtils {
 	 *            The original point to be rotated around the axis
 	 * @return PVector of the resultant rotation
 	 */
-	public static PVector rotate3d(PVector segmentStart, PVector segmentEnd,
-			float angle, PVector ptIn) {
+	public static PVector rotate3D(PVector segmentStart, PVector segmentEnd, float angle, PVector ptIn) {
 		PVector directionVector = PVector.sub(segmentStart, segmentEnd);
 		directionVector.normalize();
 		directionVector.mult(100);
@@ -419,10 +441,8 @@ public class OCR3D extends OCRUtils {
 		if (directionVector.x < 0)
 			directionXY += Math.PI;
 
-		PVector tempPoint2 = rotateXYZ(tempPoint1, new PVector(), 0, 0,
-				-directionXY);
-		PVector directionVector2 = rotateXYZ(directionVector, new PVector(), 0,
-				0, -directionXY);
+		PVector tempPoint2 = rotateXYZ(tempPoint1, new PVector(), 0, 0, -directionXY);
+		PVector directionVector2 = rotateXYZ(directionVector, new PVector(), 0, 0, -directionXY);
 		directionVector2.mult((float) 1.5);
 
 		// rotate to goto x axis
@@ -430,22 +450,62 @@ public class OCR3D extends OCRUtils {
 		if (directionVector2.x != 0)
 			directionXZ = Math.atan(directionVector2.z / directionVector2.x);
 
-		PVector tempPoint3 = rotateXYZ(tempPoint2, new PVector(), 0,
-				directionXZ, 0);
+		PVector tempPoint3 = rotateXYZ(tempPoint2, new PVector(), 0, directionXZ, 0);
 		// drawPoint(tempPoint3, color(0, 0, 255));
 
 		// now rotate around z
 		PVector tempPoint4 = rotateXYZ(tempPoint3, new PVector(), angle, 0, 0);
 
 		// bring it back..
-		PVector tempPoint5 = rotateXYZ(tempPoint4, new PVector(), 0,
-				-directionXZ, 0);
-		PVector tempPoint6 = rotateXYZ(tempPoint5, new PVector(), 0, 0,
-				directionXY);
+		PVector tempPoint5 = rotateXYZ(tempPoint4, new PVector(), 0, -directionXZ, 0);
+		PVector tempPoint6 = rotateXYZ(tempPoint5, new PVector(), 0, 0, directionXY);
 		PVector tempPoint7 = PVector.add(tempPoint6, transform1);
 
 		return tempPoint7;
 	} // end rotate3d for rotating around a segment
+
+	/**
+	 * This will take in a unit vector and rotate it a specific amount
+	 * 
+	 * @param unitVector
+	 *            The unit PVector
+	 * @param angle
+	 *            The amount to be rotated
+	 * @return The new unit PVector
+	 */
+	public static PVector rotateUnitVector2D(PVector unitVector, float angle) {
+		PVector rotated = unitVector.get();
+		float currentAngle = getAdjustedRotation(rotated);
+		currentAngle += angle;
+		rotated.set((float) Math.cos(currentAngle), (float) Math.sin(currentAngle));
+		return rotated;
+	} // end rotateUnitVector2d
+
+	private static float getAdjustedRotation(PVector rotationIn) {
+		float newRotationF = 0f;
+		if (rotationIn.x != 0)
+			newRotationF = (float) Math.atan(rotationIn.y / rotationIn.x);
+		else
+			newRotationF = -(float) Math.PI / 2;
+		if (rotationIn.x < 0)
+			newRotationF += (float) Math.PI;
+		newRotationF += (float) Math.PI / 2;
+		return newRotationF;
+	} // end getAdjustedRoation
+
+	/**
+	 * This will find the signed angle between two 2d PVectors
+	 * 
+	 * @param a
+	 *            The first PVector
+	 * @param b
+	 *            The second PVector
+	 * @return the signed angle from the first to the second PVector. Positive =
+	 *         clockwise
+	 */
+	public static float findSignedAngle2D(PVector a, PVector b) {
+		return (float) Math.atan2(a.x * b.y - a.y * b.x, a.x * b.x + a.y * b.y);
+	} // end findSignedAngle2D
 
 	// for a parallel line it will return null? maybe
 	// http://compgroups.net/comp.soft-sys.matlab/distance-between-2-lines-in-3d-space/872966
@@ -462,8 +522,7 @@ public class OCR3D extends OCRUtils {
 	 *            Second point of segment 2
 	 * @return An ArrayList of PVectors with the two connection points
 	 */
-	public static ArrayList<PVector> findNearestLineConnection(PVector p1,
-			PVector p2, PVector p3, PVector p4) {
+	public static ArrayList<PVector> findNearestLineConnection(PVector p1, PVector p2, PVector p3, PVector p4) {
 		ArrayList<PVector> pts = new ArrayList<PVector>();
 		PVector test1 = PVector.sub(p2, p1);
 		PVector test2 = PVector.sub(p4, p3);
@@ -508,19 +567,15 @@ public class OCR3D extends OCRUtils {
 	 *            The second PVector point that defines the line
 	 * @return The PVector of the closest point
 	 */
-	public static PVector findPointLineConnection(PVector targetPoint,
-			PVector p1, PVector p2) {
+	public static PVector findPointLineConnection(PVector targetPoint, PVector p1, PVector p2) {
 		PVector closest = targetPoint.get();
 		PVector ln = PVector.sub(p1, p2);
 		if (ln.mag() == 0)
 			return null;
 		PVector right = (Sandbox.makePlaneVectors(ln)).get(1);
 		PVector targetPoint2 = PVector.add(targetPoint, right);
-		ArrayList<PVector> connection = findNearestLineConnection(p1, p2,
-				targetPoint, targetPoint2);
-		if (connection.get(0).x == targetPoint.x
-				&& connection.get(0).y == targetPoint.y
-				&& connection.get(0).z == targetPoint.z)
+		ArrayList<PVector> connection = findNearestLineConnection(p1, p2, targetPoint, targetPoint2);
+		if (connection.get(0).x == targetPoint.x && connection.get(0).y == targetPoint.y && connection.get(0).z == targetPoint.z)
 			closest = connection.get(1);
 		else
 			closest = connection.get(0);
@@ -541,30 +596,25 @@ public class OCR3D extends OCRUtils {
 	 *            Second point of the segment
 	 * @return
 	 */
-	public static PVector find2DSegmentSegmentIntersection(PVector pt1,
-			PVector pt2, PVector pt3, PVector pt4) {
+	public static PVector find2DSegmentSegmentIntersection(PVector pt1, PVector pt2, PVector pt3, PVector pt4) {
 		PVector intersection = null;
 		Line2D.Float lnA = new Line2D.Float(pt1.x, pt1.y, pt2.x, pt2.y);
 		Line2D.Float lnB = new Line2D.Float(pt3.x, pt3.y, pt4.x, pt4.y);
 		if (lnA.intersectsLine(lnB)) {
 			Point2D intersectionPoint = getIntersectionPoint(lnA, lnB);
 			if (intersectionPoint != null) {
-				intersection = new PVector((float) intersectionPoint.getX(),
-						(float) intersectionPoint.getY());
+				intersection = new PVector((float) intersectionPoint.getX(), (float) intersectionPoint.getY());
 			}
 		}
 		return intersection;
 	}// end find2DSegmentSegmentIntersection
 
 	// from https://community.oracle.com/thread/1264395?start=0&tstart=0
-	private static Point2D.Float getIntersectionPoint(Line2D.Float line1,
-			Line2D.Float line2) {
+	private static Point2D.Float getIntersectionPoint(Line2D.Float line1, Line2D.Float line2) {
 		if (!line1.intersectsLine(line2))
 			return null;
-		double px = line1.getX1(), py = line1.getY1(), rx = line1.getX2() - px, ry = line1
-				.getY2() - py;
-		double qx = line2.getX1(), qy = line2.getY1(), sx = line2.getX2() - qx, sy = line2
-				.getY2() - qy;
+		double px = line1.getX1(), py = line1.getY1(), rx = line1.getX2() - px, ry = line1.getY2() - py;
+		double qx = line2.getX1(), qy = line2.getY1(), sx = line2.getX2() - qx, sy = line2.getY2() - qy;
 		double det = sx * ry - sy * rx;
 		if (det == 0) {
 			return null;
@@ -572,8 +622,7 @@ public class OCR3D extends OCRUtils {
 			double z = (sx * (qy - py) + sy * (px - qx)) / det;
 			if (z == 0 || z == 1)
 				return null; // intersection at end point!
-			return new Point2D.Float((float) (px + z * rx), (float) (py + z
-					* ry));
+			return new Point2D.Float((float) (px + z * rx), (float) (py + z * ry));
 		}
 	} // end getIntersectionPoint
 
@@ -591,8 +640,7 @@ public class OCR3D extends OCRUtils {
 	 *            perfect place
 	 * @return true if the point is on the segment
 	 */
-	public static boolean pointIsOnSegment(PVector pt1, PVector pt2,
-			PVector pt3, float tolerance) {
+	public static boolean pointIsOnSegment(PVector pt1, PVector pt2, PVector pt3, float tolerance) {
 		if (pointIsOnLine(pt1, pt2, pt3, tolerance)) {
 			float x1, x2, y1, y2, z1, z2;
 			if (pt2.x < pt3.x) {
@@ -616,8 +664,7 @@ public class OCR3D extends OCRUtils {
 				z2 = pt2.z - tolerance;
 				z1 = pt3.z + tolerance;
 			}
-			if (pt1.x >= x1 && pt1.x <= x2 && pt1.y >= y1 && pt1.y <= y2
-					&& pt1.z >= z1 && pt1.z <= z2) {
+			if (pt1.x >= x1 && pt1.x <= x2 && pt1.y >= y1 && pt1.y <= y2 && pt1.z >= z1 && pt1.z <= z2) {
 				return true;
 			}
 		}
@@ -637,8 +684,7 @@ public class OCR3D extends OCRUtils {
 	 *            Given a bit of tolerance if you want
 	 * @return true if the point is on the line
 	 */
-	public static boolean pointIsOnLine(PVector pt1, PVector pt2, PVector pt3,
-			float tolerance) {
+	public static boolean pointIsOnLine(PVector pt1, PVector pt2, PVector pt3, float tolerance) {
 		PVector dirA = PVector.sub(pt1, pt3);
 		PVector dirB = PVector.sub(pt1, pt2);
 		PVector cross = new PVector();
@@ -664,14 +710,12 @@ public class OCR3D extends OCRUtils {
 	 *            will return null if the segments do not intersect
 	 * @return
 	 */
-	public static PVector find2DRaySegmentIntersection(PVector pt1, PVector pt2,
-			PVector pt3, PVector pt4) {
+	public static PVector find2DRaySegmentIntersection(PVector pt1, PVector pt2, PVector pt3, PVector pt4) {
 		PVector intersection = null;
 		Line2D.Float lnA = new Line2D.Float(pt1.x, pt1.y, pt2.x, pt2.y);
 		Line2D.Float lnB = new Line2D.Float(pt3.x, pt3.y, pt4.x, pt4.y);
 
-		ArrayList<PVector> intersectionTest = findNearestLineConnection(pt1,
-				pt2, pt3, pt4);
+		ArrayList<PVector> intersectionTest = findNearestLineConnection(pt1, pt2, pt3, pt4);
 
 		if (intersectionTest != null && intersectionTest.size() == 2) {
 			PVector tempIntersection = intersectionTest.get(0);
@@ -691,8 +735,7 @@ public class OCR3D extends OCRUtils {
 				y1 = pt4.y;
 			}
 
-			if (tempIntersection.x >= x1 && tempIntersection.x <= x2
-					&& tempIntersection.y >= y1 && tempIntersection.y <= y2) {
+			if (tempIntersection.x >= x1 && tempIntersection.x <= x2 && tempIntersection.y >= y1 && tempIntersection.y <= y2) {
 				intersection = tempIntersection;
 			}
 
@@ -720,8 +763,7 @@ public class OCR3D extends OCRUtils {
 	 * @return null if the segment does not intersect the plane and projectionOk
 	 *         passed in as false, otherwise passes back the intersection point
 	 */
-	public static PVector findPlaneSegmentIntersection(PVector pt1,
-			PVector pt2, PVector planePt, PVector norm, boolean projectionOk) {
+	public static PVector findPlaneSegmentIntersection(PVector pt1, PVector pt2, PVector planePt, PVector norm, boolean projectionOk) {
 		PVector intersection = new PVector();
 		PVector sub1 = PVector.sub(planePt, pt1);
 		PVector sub2 = PVector.sub(pt2, pt1);
@@ -767,9 +809,7 @@ public class OCR3D extends OCRUtils {
 		if (groupIn.size() == 0)
 			return null;
 		ArrayList<PVector> extents = findExtents(groupIn);
-		return new PVector((extents.get(0).x + extents.get(1).x) / 2,
-				(extents.get(0).y + extents.get(1).y) / 2,
-				(extents.get(0).z + extents.get(1).z) / 2);
+		return new PVector((extents.get(0).x + extents.get(1).x) / 2, (extents.get(0).y + extents.get(1).y) / 2, (extents.get(0).z + extents.get(1).z) / 2);
 	} // end findExtentsCenter
 
 	/**
@@ -818,11 +858,9 @@ public class OCR3D extends OCRUtils {
 	 *            The normal of the projection plane
 	 * @return Returns the PVector of the projection point
 	 */
-	public static PVector projectPVectorToPlane(PVector ptIn,
-			PVector projectionNormal, PVector planePt, PVector planeNormal) {
+	public static PVector projectPVectorToPlane(PVector ptIn, PVector projectionNormal, PVector planePt, PVector planeNormal) {
 		PVector secondSegmentPt = PVector.add(ptIn, projectionNormal);
-		return findPlaneSegmentIntersection(ptIn, secondSegmentPt, planePt,
-				planeNormal, true);
+		return findPlaneSegmentIntersection(ptIn, secondSegmentPt, planePt, planeNormal, true);
 	} // end projectPVectorToPlane
 
 	/**
@@ -838,12 +876,10 @@ public class OCR3D extends OCRUtils {
 	 *            The normal of the projection plane * @return A PVector[] of
 	 *            the projected points
 	 */
-	public static PVector[] projectPVectorToPlane(PVector[] ptsIn,
-			PVector projectionNormal, PVector planePt, PVector planeNormal) {
+	public static PVector[] projectPVectorToPlane(PVector[] ptsIn, PVector projectionNormal, PVector planePt, PVector planeNormal) {
 		PVector[] results = new PVector[ptsIn.length];
 		for (int i = 0; i < ptsIn.length; i++) {
-			results[i] = projectPVectorToPlane(ptsIn[i], projectionNormal,
-					planePt, planeNormal);
+			results[i] = projectPVectorToPlane(ptsIn[i], projectionNormal, planePt, planeNormal);
 		}
 		return results;
 	} // end projectPVectorToPlane

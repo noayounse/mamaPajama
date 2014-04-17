@@ -2,7 +2,7 @@ import ocrUtils.*;
 
 void setup() {
   // smaple folder
-  String targetDirectory = sketchPath("") + "/ExampleFolder";
+  String targetDirectory = sketchPath("") + "../../";
 
   // start the OCRUtils
   OCRUtils.begin(this);

@@ -620,8 +620,10 @@ public class OCR3D extends OCRUtils {
 			return null;
 		} else {
 			double z = (sx * (qy - py) + sy * (px - qx)) / det;
-			if (z == 0 || z == 1)
+			if (z == 0 || z == 1) {
 				return null; // intersection at end point!
+				
+			}
 			return new Point2D.Float((float) (px + z * rx), (float) (py + z * ry));
 		}
 	} // end getIntersectionPoint

@@ -82,7 +82,8 @@ public class OCR3D extends OCRUtils {
 	} // end drawPoint
 
 	/**
-	 * This will draw a vector with a simple arrowhead describing the direction in 2D
+	 * This will draw a vector with a simple arrowhead describing the direction
+	 * in 2D
 	 * 
 	 * @param vecIn
 	 *            The PVector to be drawn
@@ -95,9 +96,10 @@ public class OCR3D extends OCRUtils {
 	public static void drawVector2D(PVector vecIn, PVector departurePoint, float arrowSize) {
 		drawVector(vecIn, departurePoint, arrowSize, false);
 	} // drawVector3D
-	
+
 	/**
-	 * This will draw a vector with a simple arrowhead describing the direction in 3D
+	 * This will draw a vector with a simple arrowhead describing the direction
+	 * in 3D
 	 * 
 	 * @param vecIn
 	 *            The PVector to be drawn
@@ -138,13 +140,14 @@ public class OCR3D extends OCRUtils {
 		} else {
 			PVector arrow = vecIn.get();
 			arrow.normalize();
-			arrow = rotateUnitVector2D(arrow,(arrow.x != 0 || arrow.y <= 0  ? (float)Math.PI/4 : -(float)Math.PI/4)); // lazy lazy
+			arrow = rotateUnitVector2D(arrow, -3 * (float)Math.PI/ 4);
+																																	
 			arrow.mult(arrowSize);
 			arrow.add(vecIn);
 			parent.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
 			arrow = vecIn.get();
 			arrow.normalize();
-			arrow = rotateUnitVector2D(arrow, (arrow.x != 0 || arrow.y <= 0 ? 3 * (float)Math.PI/4 : -3 * (float)Math.PI/4));
+			arrow = rotateUnitVector2D(arrow, 3 * (float)Math.PI/ 4);
 			arrow.mult(arrowSize);
 			arrow.add(vecIn);
 			parent.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
@@ -487,9 +490,14 @@ public class OCR3D extends OCRUtils {
 			newRotationF = (float) Math.atan(rotationIn.y / rotationIn.x);
 		else
 			newRotationF = -(float) Math.PI / 2;
-		if (rotationIn.x < 0)
-			newRotationF += (float) Math.PI;
-		newRotationF += (float) Math.PI / 2;
+		if (rotationIn.x <= 0) {
+			if (rotationIn.x != 0)
+				newRotationF += (float) Math.PI;
+			else if (rotationIn.y >= 0)
+				newRotationF += (float) Math.PI;
+		}
+		// newRotationF += (float) Math.PI / 2; // can't remember why this is in
+		// here...?
 		return newRotationF;
 	} // end getAdjustedRoation
 
@@ -622,7 +630,7 @@ public class OCR3D extends OCRUtils {
 			double z = (sx * (qy - py) + sy * (px - qx)) / det;
 			if (z == 0 || z == 1) {
 				return null; // intersection at end point!
-				
+
 			}
 			return new Point2D.Float((float) (px + z * rx), (float) (py + z * ry));
 		}

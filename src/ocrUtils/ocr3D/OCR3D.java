@@ -484,7 +484,12 @@ public class OCR3D extends OCRUtils {
 		return rotated;
 	} // end rotateUnitVector2d
 
-	private static float getAdjustedRotation(PVector rotationIn) {
+	/**
+	 * This should return an adjusted rotation float for a vector 
+	 * @param rotationIn The vector to get the rotation float for
+	 * @return The float of the adjusted rotation
+	 */
+	public static float getAdjustedRotation(PVector rotationIn) {
 		float newRotationF = 0f;
 		if (rotationIn.x != 0)
 			newRotationF = (float) Math.atan(rotationIn.y / rotationIn.x);
@@ -496,8 +501,6 @@ public class OCR3D extends OCRUtils {
 			else if (rotationIn.y >= 0)
 				newRotationF += (float) Math.PI;
 		}
-		// newRotationF += (float) Math.PI / 2; // can't remember why this is in
-		// here...?
 		return newRotationF;
 	} // end getAdjustedRoation
 

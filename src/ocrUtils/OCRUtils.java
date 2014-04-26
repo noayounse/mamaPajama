@@ -182,6 +182,37 @@ public class OCRUtils {
 		return newList;
 	} // end shuffleArrayList
 
+	public static void sortObjectArrayListsSimple(ArrayList masterList, String paramName, ArrayList... listsIn) {
+		int count = masterList.size();
+		for (ArrayList al : listsIn) {
+			if (al.size() != count || count == 0) {
+				System.out.println("counts of lists are not the same, did not sort");
+				return;
+			}
+		}
+		ArrayList<ArrayList> result = sortObjectArrayListSimpleMaster(masterList, paramName);
+		masterList.clear();
+		for (Object o : result.get(0)) masterList.add(o);
+		//masterList = result.get(0);
+		ArrayList[] orderedLists = new ArrayList[listsIn.length];
+		for (int i = 0; i < listsIn.length; i++)
+			orderedLists[i] = new ArrayList();
+		for (int i = 0; i < result.get(1).size(); i++) {
+			int index = (Integer) result.get(1).get(i);
+			for (int j = 0; j < listsIn.length; j++) {
+				orderedLists[j].add(listsIn[j].get(index));
+			}
+		}
+		
+		
+		for (int i = 0; i < listsIn.length; i++) {
+			listsIn[i].clear();
+			for (int j = 0; j < orderedLists[i].size(); j++) {
+				listsIn[i].add(orderedLists[i].get(j));
+			}
+		}
+	} // sortObjectArrayListsSimple
+
 	// see http://www.javapractices.com/topic/TopicAction.do?Id=207
 	/**
 	 * This will sort an ArrayList of Objects by a specified field.
@@ -194,7 +225,13 @@ public class OCRUtils {
 	 * @return The ascending ArrayList of Objects
 	 */
 	public static ArrayList sortObjectArrayListSimple(ArrayList listIn, String paramName) {
+		return sortObjectArrayListSimpleMaster(listIn, paramName).get(0);
+	} // end sortObjectArrayListSimple
+
+	private static ArrayList<ArrayList> sortObjectArrayListSimpleMaster(ArrayList listIn, String paramName) {
+		ArrayList<ArrayList> answer = new ArrayList<ArrayList>();
 		ArrayList newList = new ArrayList();
+		ArrayList<Integer> indices = new ArrayList<Integer>();
 		try {
 			if (listIn.size() > 0) {
 				Class<?> c = listIn.get(0).getClass();
@@ -206,6 +243,8 @@ public class OCRUtils {
 				Integer ii = new Integer(14);
 				Map sortedPos = new LinkedHashMap();
 				Map sortedNeg = new LinkedHashMap();
+				Map unsorted = new LinkedHashMap();
+				int indexCount = 0;
 				long count = 0;
 				if (t.isPrimitive()) {
 					for (Object thisObj : listIn) {
@@ -239,8 +278,9 @@ public class OCRUtils {
 						} else {
 							sortedPos.put(newKey, thisObj);
 						}
-
+						unsorted.put(thisObj, indexCount);
 						count++;
+						indexCount++;
 					}
 					TreeMap<String, Object> resultPos = new TreeMap();
 					resultPos.putAll(sortedPos);
@@ -253,7 +293,9 @@ public class OCRUtils {
 					for (Object thisObj : listIn) {
 						String key = (String) (f.get(thisObj));
 						sortedPos.put(key + "-" + count, thisObj);
+						unsorted.put(thisObj, indexCount);
 						count++;
+						indexCount++;
 					}
 					TreeMap<String, Object> result = new TreeMap(String.CASE_INSENSITIVE_ORDER);
 					result.putAll(sortedPos);
@@ -272,16 +314,22 @@ public class OCRUtils {
 				Iterator itPos = sortedPos.entrySet().iterator();
 				while (itPos.hasNext()) {
 					Map.Entry pairs = (Map.Entry) itPos.next();
-					newList.add(pairs.getValue());
+					Object obj = pairs.getValue();
+					newList.add(obj);
+					indices.add((Integer) unsorted.get(obj));
 					itPos.remove();
 				}
 			}
 		} catch (Exception e) {
 			System.out.println("problem sorting list.  listIn.size(): " + listIn.size() + " and param: " + paramName);
-			return listIn;
+			answer.add(newList);
+			answer.add(indices);
+			return answer;
 		}
-		return newList;
-	} // end sortObjectArrayListSimple
+		answer.add(newList);
+		answer.add(indices);
+		return answer;
+	} // end sortObjectArrayListSimpleMaster
 
 	/**
 	 * This will simply reverse an ArrayList

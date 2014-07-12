@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.io.File;
 import java.lang.reflect.*;
 import java.util.Map;
+import java.awt.Color;
 
 import processing.core.*;
 import processing.data.IntDict;

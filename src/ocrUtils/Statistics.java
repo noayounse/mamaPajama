@@ -31,20 +31,20 @@ public class Statistics {
 	 * 
 	 * @return double array with min and max
 	 */
-	public double[] getMaxMin() {
+	public double[] getMinMax() {
 		double[] b = new double[data.length];
-		double[] maxMin = new double[2];
+		double[] minMax = new double[2];
 		if (b.length > 0) {
 			System.arraycopy(data, 0, b, 0, b.length);
 			Arrays.sort(b);
 
-			maxMin[0] = b[0];
-			maxMin[1] = b[b.length - 1];
+			minMax[0] = b[0];
+			minMax[1] = b[b.length - 1];
 		} else {
-			maxMin[0] = maxMin[1] = 0;
+			minMax[0] = minMax[1] = 0;
 		}
-		return maxMin;
-	} // end getMaxMin
+		return minMax;
+	} // end getMinMax
 
 	/**
 	 * Get the mean for the data double[]
@@ -97,6 +97,21 @@ public class Statistics {
 			return b[b.length / 2];
 		}
 	}
+
+	
+	/**
+	 * Returns minMax, mean, median, standard deviation, and variance
+	 */
+	public String toString() {
+		String builder = "Statistics object of " + data.length + " doubles";
+		double[] minMax = getMinMax();
+		builder += "\n min: " + minMax[0] + " max: " + minMax[1];
+		builder += "\n mean: " + getMean();
+		builder += "\n median: " + getMedian();
+		builder += "\n standard deviation: " + getStdDev();
+		builder += "\n variance: " + getVariance();
+		return builder;
+	} // end toString
 
 	// other fun
 

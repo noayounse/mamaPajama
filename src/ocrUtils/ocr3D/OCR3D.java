@@ -5,9 +5,7 @@ import java.awt.geom.*;
 
 import ocrUtils.OCRUtils;
 import ocrUtils.Sandbox;
-import processing.core.PApplet;
-import processing.core.PConstants;
-import processing.core.PVector;
+import processing.core.*;
 
 public class OCR3D extends OCRUtils {
 
@@ -19,9 +17,9 @@ public class OCR3D extends OCRUtils {
 	 * @param gridSize
 	 *            How many units each grid will be
 	 */
-	public static void drawGrid(float gridExtents, float gridSize) {
+	public static void drawGrid(PGraphics pg, float gridExtents, float gridSize) {
 		float[] baseColor = { 55, 55, 55, 255 };
-		drawGrid(gridExtents, gridSize, Sandbox.composeColorInt(baseColor));
+		drawGrid(pg, gridExtents, gridSize, Sandbox.composeColorInt(baseColor));
 	} // end drawGrid
 
 	/**
@@ -34,14 +32,15 @@ public class OCR3D extends OCRUtils {
 	 * @param baseColor
 	 *            The base color for the grid [excluding the alpha]
 	 */
-	public static void drawGrid(float gridExtents, float gridSize, int baseColor) {
+	public static void drawGrid(PGraphics pg, float gridExtents, float gridSize, int baseColor) {
 		float[] brokenColor = Sandbox.breakUpColorInt(baseColor);
-		parent.noFill();
-		parent.stroke(brokenColor[1], brokenColor[2], brokenColor[3], 55);
-		parent.strokeWeight(1);
+		pg.noFill();
+		pg.stroke(brokenColor[1], brokenColor[2], brokenColor[3], 55);
+		pg.strokeWeight(1);
+		pg.strokeWeight(1);
 		for (float i = -gridExtents; i <= gridExtents; i += gridSize) {
-			parent.line(-gridExtents, i, gridExtents, i);
-			parent.line(i, -gridExtents, i, gridExtents);
+			pg.line(-gridExtents, i, gridExtents, i);
+			pg.line(i, -gridExtents, i, gridExtents);
 		}
 	} // end drawGridLight
 
@@ -50,17 +49,17 @@ public class OCR3D extends OCRUtils {
 	 * axis, and Blue for Z axis. The longer side indicates the positive
 	 * direction
 	 */
-	public static void drawOrigin() {
-		parent.pushStyle();
-		parent.colorMode(PConstants.HSB, 360);
-		parent.strokeWeight(1);
-		parent.stroke(0, 360, 360);
-		parent.line(-30, 0, 0, 100, 0, 0);
-		parent.stroke(107, 360, 360);
-		parent.line(0, -30, 0, 0, 100, 0);
-		parent.stroke(236, 360, 360);
-		parent.line(0, 0, -30, 0, 0, 100);
-		parent.popStyle();
+	public static void drawOrigin(PGraphics pg) {
+		pg.pushStyle();
+		pg.colorMode(PConstants.HSB, 360);
+		pg.strokeWeight(1);
+		pg.stroke(0, 360, 360);
+		pg.line(-30, 0, 0, 100, 0, 0);
+		pg.stroke(107, 360, 360);
+		pg.line(0, -30, 0, 0, 100, 0);
+		pg.stroke(236, 360, 360);
+		pg.line(0, 0, -30, 0, 0, 100);
+		pg.popStyle();
 	} // end drawOrigin
 
 	/**
@@ -71,14 +70,14 @@ public class OCR3D extends OCRUtils {
 	 * @param length
 	 *            The overall length of the line that will represent the point
 	 */
-	public static void drawPoint(PVector p, float length) {
-		parent.pushMatrix();
-		parent.translate(0, 0, p.z);
-		parent.translate(p.x, p.y, 0);
-		parent.line(-length / 2, 0, 0, length / 2, 0, 0);
-		parent.line(0, -length / 2, 0, 0, length / 2, 0);
-		parent.line(0, 0, -length / 2, 0, 0, length / 2);
-		parent.popMatrix();
+	public static void drawPoint(PGraphics pg, PVector p, float length) {
+		pg.pushMatrix();
+		pg.translate(0, 0, p.z);
+		pg.translate(p.x, p.y, 0);
+		pg.line(-length / 2, 0, 0, length / 2, 0, 0);
+		pg.line(0, -length / 2, 0, 0, length / 2, 0);
+		pg.line(0, 0, -length / 2, 0, 0, length / 2);
+		pg.popMatrix();
 	} // end drawPoint
 
 	/**
@@ -93,8 +92,8 @@ public class OCR3D extends OCRUtils {
 	 * @param arrowSize
 	 *            How big to make the arrowhead lines
 	 */
-	public static void drawVector2D(PVector vecIn, PVector departurePoint, float arrowSize) {
-		drawVector(vecIn, departurePoint, arrowSize, false);
+	public static void drawVector2D(PGraphics pg, PVector vecIn, PVector departurePoint, float arrowSize) {
+		drawVector(pg, vecIn, departurePoint, arrowSize, false);
 	} // drawVector3D
 
 	/**
@@ -109,20 +108,20 @@ public class OCR3D extends OCRUtils {
 	 * @param arrowSize
 	 *            How big to make the arrowhead lines
 	 */
-	public static void drawVector3D(PVector vecIn, PVector departurePoint, float arrowSize) {
-		drawVector(vecIn, departurePoint, arrowSize, true);
+	public static void drawVector3D(PGraphics pg, PVector vecIn, PVector departurePoint, float arrowSize) {
+		drawVector(pg, vecIn, departurePoint, arrowSize, true);
 	} // drawVector3D
 
-	private static void drawVector(PVector vecIn, PVector departurePoint, float arrowSize, boolean is3d) {
-		parent.pushMatrix();
+	private static void drawVector(PGraphics pg, PVector vecIn, PVector departurePoint, float arrowSize, boolean is3d) {
+		pg.pushMatrix();
 		if (is3d)
-			parent.translate(departurePoint.x, departurePoint.y, departurePoint.z);
+			pg.translate(departurePoint.x, departurePoint.y, departurePoint.z);
 		else
-			parent.translate(departurePoint.x, departurePoint.y);
+			pg.translate(departurePoint.x, departurePoint.y);
 		if (is3d)
-			parent.line(0, 0, 0, vecIn.x, vecIn.y, vecIn.z);
+			pg.line(0, 0, 0, vecIn.x, vecIn.y, vecIn.z);
 		else
-			parent.line(0, 0, vecIn.x, vecIn.y);
+			pg.line(0, 0, vecIn.x, vecIn.y);
 
 		PVector pt1 = vecIn.get();
 		PVector direction = vecIn.get();
@@ -133,26 +132,26 @@ public class OCR3D extends OCRUtils {
 			ArrayList<PVector> planeVectors = Sandbox.makePlaneVectors(vecIn);
 			planeVectors.get(0).mult(arrowSize);
 			pt1.add(planeVectors.get(0));
-			parent.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
+			pg.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
 			planeVectors.get(0).mult(-2);
 			pt1.add(planeVectors.get(0));
-			parent.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
+			pg.line(vecIn.x, vecIn.y, vecIn.z, pt1.x, pt1.y, pt1.z);
 		} else {
 			PVector arrow = vecIn.get();
 			arrow.normalize();
-			arrow = rotateUnitVector2D(arrow, -3 * (float)Math.PI/ 4);
-																																	
+			arrow = rotateUnitVector2D(arrow, -3 * (float) Math.PI / 4);
+
 			arrow.mult(arrowSize);
 			arrow.add(vecIn);
-			parent.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
+			pg.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
 			arrow = vecIn.get();
 			arrow.normalize();
-			arrow = rotateUnitVector2D(arrow, 3 * (float)Math.PI/ 4);
+			arrow = rotateUnitVector2D(arrow, 3 * (float) Math.PI / 4);
 			arrow.mult(arrowSize);
 			arrow.add(vecIn);
-			parent.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
+			pg.line(arrow.x, arrow.y, vecIn.x, vecIn.y);
 		}
-		parent.popMatrix();
+		pg.popMatrix();
 	} // end drawVector
 
 	/**
@@ -170,13 +169,13 @@ public class OCR3D extends OCRUtils {
 	 *            Default point size will be the extendAmount / 2 or 5,
 	 *            whichever is bigger
 	 */
-	public static void drawSegment(PVector segmentTop, PVector segmentBottom, float extendAmount, boolean drawPoints) {
+	public static void drawSegment(PGraphics pg, PVector segmentTop, PVector segmentBottom, float extendAmount, boolean drawPoints) {
 		PVector segTop = segmentTop.get();
 		PVector segBot = segmentBottom.get();
 		if (drawPoints) {
 			float ptAmt = extendAmount / 2 > 5 ? extendAmount / 2 : 5;
-			drawPoint(segTop, ptAmt);
-			drawPoint(segBot, ptAmt);
+			drawPoint(pg, segTop, ptAmt);
+			drawPoint(pg, segBot, ptAmt);
 		}
 		if (extendAmount > 0) {
 			PVector dir = PVector.sub(segTop, segBot);
@@ -186,8 +185,149 @@ public class OCR3D extends OCRUtils {
 			segTop.add(dir);
 			segBot.sub(dir);
 		}
-		parent.line(segTop.x, segTop.y, segTop.z, segBot.x, segBot.y, segBot.z);
+		pg.line(segTop.x, segTop.y, segTop.z, segBot.x, segBot.y, segBot.z);
 	} // end drawSegment
+
+	/**
+	 * Will draw a gradient line in 3d
+	 * 
+	 * @param pg
+	 *            The PGraphic to draw on
+	 * @param start
+	 *            The PVector starting point
+	 * @param end
+	 *            The PVector ending point
+	 * @param startColor
+	 *            The starting color for the line
+	 * @param endColor
+	 *            The ending color for the line
+	 * @param divisions
+	 *            How many mini segments to break it up into. Should be 2 or
+	 *            more
+	 */
+	public static void drawGradientLine3D(PGraphics pg, PVector start, PVector end, int startColor, int endColor, int divisions) {
+		drawGradientLine(pg, start, end, startColor, endColor, divisions, true);
+	} // end drawGradientLine3D
+
+	/**
+	 * Will draw a gradient line in 2d
+	 * 
+	 * @param pg
+	 *            The PGraphic to draw on
+	 * @param start
+	 *            The PVector starting point
+	 * @param end
+	 *            The PVector ending point
+	 * @param startColor
+	 *            The starting color for the line
+	 * @param endColor
+	 *            The ending color for the line
+	 * @param divisions
+	 *            How many mini segments to break it up into. Should be 2 or
+	 *            more
+	 */
+	public static void drawGradientLine2D(PGraphics pg, PVector start, PVector end, int startColor, int endColor, int divisions) {
+		drawGradientLine(pg, start, end, startColor, endColor, divisions, false);
+	} // end drawGradientLine3D
+
+	//
+	private static void drawGradientLine(PGraphics pg, PVector startIn, PVector end, int startColor, int endColor, int divisions, boolean is3D) {
+		PVector start = startIn.get();
+		pg.pushStyle();
+		if (divisions < 1) {
+			// nothing
+		} else if (divisions == 1) {
+			pg.stroke(startColor);
+			if (is3D)
+				pg.line(start.x, start.y, start.z, end.x, end.y, end.z);
+			else
+				pg.line(start.x, start.y, end.x, end.y);
+		} else {
+			// split it up
+			PVector normal = PVector.sub(end, start);
+			normal.div(divisions);
+			for (int i = 1; i <= divisions; i++) {
+				pg.stroke(parent.lerpColor(startColor, endColor, PApplet.map(i, 1, divisions, 0, 1f)));
+				if (is3D)
+					pg.line(start.x, start.y, start.z, start.x + normal.x, start.y + normal.y, start.z + normal.z);
+				else
+					pg.line(start.x, start.y, start.x + normal.x, start.y + normal.y);
+				start.add(normal);
+			}
+		}
+		pg.popStyle();
+	} // end drawGradientLine
+
+	// how about a dashed line!
+
+	/**
+	 * This will draw a dashed line in 3D
+	 * 
+	 * @param pg
+	 *            The PGraphic to draw on
+	 * @param start
+	 *            The starting PVector
+	 * @param end
+	 *            The ending PVector
+	 * @param segLength
+	 *            How long to make the line segment
+	 * @param spacingLength
+	 *            How long to space between line segments
+	 */
+	public static void drawDashedLine3D(PGraphics pg, PVector start, PVector end, float segLength, float spacingLength) {
+		drawDashedLine(pg, start, end, segLength, spacingLength, true);
+	} // end drawDottedLine3D
+
+	/**
+	 * This will draw a dashed line in 2D
+	 * 
+	 * @param pg
+	 *            The PGraphic to draw on
+	 * @param start
+	 *            The starting PVector
+	 * @param end
+	 *            The ending PVector
+	 * @param segLength
+	 *            How long to make the line segment
+	 * @param spacingLength
+	 *            How long to space between line segments
+	 */
+	public static void drawDashedLine2D(PGraphics pg, PVector start, PVector end, float segLength, float spacingLength) {
+		drawDashedLine(pg, start, end, segLength, spacingLength, false);
+	} // end drawDottedLine3D
+		//
+
+	private static void drawDashedLine(PGraphics pg, PVector start, PVector end, float segLength, float spacingLength, boolean is3D) {
+		if (!is3D) {
+			start.z = 0;
+			end.z = 0;
+		}
+		float dist = start.dist(end);
+		float x1 = start.x;
+		float x2 = end.x;
+		float y1 = start.y;
+		float y2 = end.y;
+		float z1 = start.z;
+		float z2 = end.z;
+		float distA = 0f;
+		float distB = segLength;
+		for (float x = 0; x < dist; x += spacingLength + segLength) {
+			if (distB > dist)
+				distB = dist;
+			x1 = PApplet.map(distA, 0, dist, start.x, end.x);
+			x2 = PApplet.map(distB, 0, dist, start.x, end.x);
+			y1 = PApplet.map(distA, 0, dist, start.y, end.y);
+			y2 = PApplet.map(distB, 0, dist, start.y, end.y);
+			z1 = PApplet.map(distA, 0, dist, start.z, end.z);
+			z2 = PApplet.map(distB, 0, dist, start.z, end.z);
+			if (is3D)
+				pg.line(x1, y1, z1, x2, y2, z2);
+			else
+				pg.line(x1, y1, x2, y2);
+			distA += spacingLength + segLength;
+			distB += spacingLength + segLength;
+		}
+	} // end drawDottedLine
 
 	/*
 	 * // do this later.... public static void drawRectangle3Pt(PVector a,
@@ -204,25 +344,25 @@ public class OCR3D extends OCRUtils {
 	 * @param b
 	 *            Second point
 	 */
-	public static void drawRectXYZ(PVector a, PVector b) {
-		parent.beginShape();
+	public static void drawRectXYZ(PGraphics pg, PVector a, PVector b) {
+		pg.beginShape();
 		if (a.x == b.x) {
-			parent.vertex(a.x, a.y, a.z);
-			parent.vertex(a.x, b.y, a.z);
-			parent.vertex(a.x, b.y, b.z);
-			parent.vertex(a.x, a.y, b.z);
+			pg.vertex(a.x, a.y, a.z);
+			pg.vertex(a.x, b.y, a.z);
+			pg.vertex(a.x, b.y, b.z);
+			pg.vertex(a.x, a.y, b.z);
 		} else if (a.y == b.y) {
-			parent.vertex(a.x, a.y, a.z);
-			parent.vertex(b.x, a.y, a.z);
-			parent.vertex(b.x, a.y, b.z);
-			parent.vertex(a.x, a.y, b.z);
+			pg.vertex(a.x, a.y, a.z);
+			pg.vertex(b.x, a.y, a.z);
+			pg.vertex(b.x, a.y, b.z);
+			pg.vertex(a.x, a.y, b.z);
 		} else if (a.z == b.z) {
-			parent.vertex(a.x, a.y, a.z);
-			parent.vertex(b.x, a.y, a.z);
-			parent.vertex(b.x, b.y, a.z);
-			parent.vertex(a.x, b.y, a.z);
+			pg.vertex(a.x, a.y, a.z);
+			pg.vertex(b.x, a.y, a.z);
+			pg.vertex(b.x, b.y, a.z);
+			pg.vertex(a.x, b.y, a.z);
 		}
-		parent.endShape(PApplet.CLOSE);
+		pg.endShape(PApplet.CLOSE);
 	} // end drawRectXYZ
 
 	/**
@@ -234,8 +374,8 @@ public class OCR3D extends OCRUtils {
 	 * @param upper
 	 *            The other PVector corner point
 	 */
-	public static void drawBoxXYZ(PVector lower, PVector upper) {
-		drawBoxXYZ(lower, upper, false);
+	public static void drawBoxXYZ(PGraphics pg, PVector lower, PVector upper) {
+		drawBoxXYZ(pg, lower, upper, false);
 	} // end drawBox
 
 	/**
@@ -249,29 +389,29 @@ public class OCR3D extends OCRUtils {
 	 *            Boolean whether or not to use a fill on the box or just draw
 	 *            the lines
 	 */
-	public static void drawBoxXYZ(PVector lower, PVector upper, boolean fill) {
+	public static void drawBoxXYZ(PGraphics pg, PVector lower, PVector upper, boolean fill) {
 		if (fill) {
-			parent.beginShape();
-			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(upper.x, upper.y, lower.z));
-			drawRectXYZ(new PVector(lower.x, lower.y, upper.z), new PVector(upper.x, upper.y, upper.z));
-			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(upper.x, lower.y, upper.z));
-			drawRectXYZ(new PVector(lower.x, lower.y, lower.z), new PVector(lower.x, upper.y, upper.z));
-			drawRectXYZ(new PVector(upper.x, upper.y, upper.z), new PVector(lower.x, upper.y, lower.z));
-			drawRectXYZ(new PVector(upper.x, upper.y, upper.z), new PVector(upper.x, lower.y, lower.z));
-			parent.endShape(PApplet.CLOSE);
+			pg.beginShape();
+			drawRectXYZ(pg, new PVector(lower.x, lower.y, lower.z), new PVector(upper.x, upper.y, lower.z));
+			drawRectXYZ(pg, new PVector(lower.x, lower.y, upper.z), new PVector(upper.x, upper.y, upper.z));
+			drawRectXYZ(pg, new PVector(lower.x, lower.y, lower.z), new PVector(upper.x, lower.y, upper.z));
+			drawRectXYZ(pg, new PVector(lower.x, lower.y, lower.z), new PVector(lower.x, upper.y, upper.z));
+			drawRectXYZ(pg, new PVector(upper.x, upper.y, upper.z), new PVector(lower.x, upper.y, lower.z));
+			drawRectXYZ(pg, new PVector(upper.x, upper.y, upper.z), new PVector(upper.x, lower.y, lower.z));
+			pg.endShape(PApplet.CLOSE);
 		} else {
-			parent.line(lower.x, lower.y, lower.z, upper.x, lower.y, lower.z);
-			parent.line(lower.x, lower.y, lower.z, lower.x, upper.y, lower.z);
-			parent.line(lower.x, lower.y, lower.z, lower.x, lower.y, upper.z);
-			parent.line(upper.x, upper.y, upper.z, lower.x, upper.y, upper.z);
-			parent.line(upper.x, upper.y, upper.z, upper.x, lower.y, upper.z);
-			parent.line(upper.x, upper.y, upper.z, upper.x, upper.y, lower.z);
-			parent.line(lower.x, lower.y, upper.z, upper.x, lower.y, upper.z);
-			parent.line(lower.x, lower.y, upper.z, lower.x, upper.y, upper.z);
-			parent.line(lower.x, upper.y, lower.z, lower.x, upper.y, upper.z);
-			parent.line(upper.x, upper.y, lower.z, lower.x, upper.y, lower.z);
-			parent.line(upper.x, upper.y, lower.z, upper.x, lower.y, lower.z);
-			parent.line(upper.x, lower.y, upper.z, upper.x, lower.y, lower.z);
+			pg.line(lower.x, lower.y, lower.z, upper.x, lower.y, lower.z);
+			pg.line(lower.x, lower.y, lower.z, lower.x, upper.y, lower.z);
+			pg.line(lower.x, lower.y, lower.z, lower.x, lower.y, upper.z);
+			pg.line(upper.x, upper.y, upper.z, lower.x, upper.y, upper.z);
+			pg.line(upper.x, upper.y, upper.z, upper.x, lower.y, upper.z);
+			pg.line(upper.x, upper.y, upper.z, upper.x, upper.y, lower.z);
+			pg.line(lower.x, lower.y, upper.z, upper.x, lower.y, upper.z);
+			pg.line(lower.x, lower.y, upper.z, lower.x, upper.y, upper.z);
+			pg.line(lower.x, upper.y, lower.z, lower.x, upper.y, upper.z);
+			pg.line(upper.x, upper.y, lower.z, lower.x, upper.y, lower.z);
+			pg.line(upper.x, upper.y, lower.z, upper.x, lower.y, lower.z);
+			pg.line(upper.x, lower.y, upper.z, upper.x, lower.y, lower.z);
 		}
 	} // end drawBox with specifics
 
@@ -287,8 +427,8 @@ public class OCR3D extends OCRUtils {
 	 * @param outlineColor
 	 *            The color used to outline the plane
 	 */
-	public static void drawPlane(PVector planePoint, PVector planeNormal, float planeSize, int outlineColor) {
-		drawPlane(planePoint, planeNormal, planeSize, outlineColor, -1);
+	public static void drawPlane(PGraphics pg, PVector planePoint, PVector planeNormal, float planeSize, int outlineColor) {
+		drawPlane(pg, planePoint, planeNormal, planeSize, outlineColor, -1);
 	}
 
 	/**
@@ -305,12 +445,12 @@ public class OCR3D extends OCRUtils {
 	 * @param fillColor
 	 *            The color to fill the plane
 	 */
-	public static void drawPlane(PVector planePoint, PVector planeNormal, float planeSize, int outlineColor, int fillColor) {
+	public static void drawPlane(PGraphics pg, PVector planePoint, PVector planeNormal, float planeSize, int outlineColor, int fillColor) {
 		float[] brokenOutlineColor = Sandbox.breakUpColorInt(outlineColor);
 		float[] brokenFillColor = Sandbox.breakUpColorInt(fillColor);
-		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
+		pg.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
 		float planePointLength = 5f;
-		drawPoint(planePoint, planePointLength);
+		drawPoint(pg, planePoint, planePointLength);
 		ArrayList<PVector> planeVectors = Sandbox.makePlaneVectors(planeNormal);
 		PVector up = planeVectors.get(0);
 		PVector rt = planeVectors.get(1);
@@ -319,30 +459,30 @@ public class OCR3D extends OCRUtils {
 		PVector cornerA = planePoint.get();
 		cornerA.sub(up);
 		cornerA.sub(rt);
-		drawPoint(cornerA, planePointLength);
+		drawPoint(pg, cornerA, planePointLength);
 		PVector cornerB = planePoint.get();
 		cornerB.add(up);
 		cornerB.sub(rt);
-		drawPoint(cornerB, planePointLength);
+		drawPoint(pg, cornerB, planePointLength);
 		PVector cornerC = planePoint.get();
 		cornerC.add(up);
 		cornerC.add(rt);
-		drawPoint(cornerC, planePointLength);
+		drawPoint(pg, cornerC, planePointLength);
 		PVector cornerD = planePoint.get();
 		cornerD.sub(up);
 		cornerD.add(rt);
-		drawPoint(cornerD, planePointLength);
+		drawPoint(pg, cornerD, planePointLength);
 		if (fillColor != -1)
-			parent.fill(brokenFillColor[1], brokenFillColor[2], brokenFillColor[3], brokenFillColor[0]);
+			pg.fill(brokenFillColor[1], brokenFillColor[2], brokenFillColor[3], brokenFillColor[0]);
 		else
-			parent.noFill();
-		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
-		parent.beginShape();
-		parent.vertex(cornerA.x, cornerA.y, cornerA.z);
-		parent.vertex(cornerB.x, cornerB.y, cornerB.z);
-		parent.vertex(cornerC.x, cornerC.y, cornerC.z);
-		parent.vertex(cornerD.x, cornerD.y, cornerD.z);
-		parent.endShape(PApplet.CLOSE);
+			pg.noFill();
+		pg.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
+		pg.beginShape();
+		pg.vertex(cornerA.x, cornerA.y, cornerA.z);
+		pg.vertex(cornerB.x, cornerB.y, cornerB.z);
+		pg.vertex(cornerC.x, cornerC.y, cornerC.z);
+		pg.vertex(cornerD.x, cornerD.y, cornerD.z);
+		pg.endShape(PApplet.CLOSE);
 
 		float normalLength = planeSize / 4;
 		PVector otherPoint = planePoint.get();
@@ -350,11 +490,11 @@ public class OCR3D extends OCRUtils {
 		normalizedNormal.normalize();
 		normalizedNormal.mult(normalLength);
 		otherPoint.add(normalizedNormal);
-		parent.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
-		parent.line(otherPoint.x, otherPoint.y, otherPoint.z, planePoint.x, planePoint.y, planePoint.z);
-		parent.noStroke();
-		parent.fill(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
-		drawPoint(otherPoint, planePointLength);
+		pg.stroke(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
+		pg.line(otherPoint.x, otherPoint.y, otherPoint.z, planePoint.x, planePoint.y, planePoint.z);
+		pg.noStroke();
+		pg.fill(brokenOutlineColor[1], brokenOutlineColor[2], brokenOutlineColor[3], brokenOutlineColor[0]);
+		drawPoint(pg, otherPoint, planePointLength);
 	} // end drawPlane
 
 	/**
@@ -485,8 +625,10 @@ public class OCR3D extends OCRUtils {
 	} // end rotateUnitVector2d
 
 	/**
-	 * This should return an adjusted rotation float for a vector 
-	 * @param rotationIn The vector to get the rotation float for
+	 * This should return an adjusted rotation float for a vector
+	 * 
+	 * @param rotationIn
+	 *            The vector to get the rotation float for
 	 * @return The float of the adjusted rotation
 	 */
 	public static float getAdjustedRotation(PVector rotationIn) {

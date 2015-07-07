@@ -66,9 +66,13 @@ public class Colors extends OCRUtils {
 
 			while (i.hasNext()) {
 				String key = (String) i.next();
-				if (key.equals("name"))
+				if (key.equals("name")) {
 					name = json.getString("name");
-				else {
+				} else if (key.contains("_comment")) {
+					// nothing
+					//System.out.println("found comment with key: "
+						//	+ json.getString(key));
+				} else {
 					String colorString = json.getString(key);
 					if (colorString.contains(",")) {
 						// println("splitting up an rgb color: " + colorString);
@@ -352,7 +356,7 @@ public class Colors extends OCRUtils {
 		for (Map.Entry me : colors.entrySet()) {
 			parent.fill((Integer) me.getValue());
 			parent.rect(x, y, 20, 20);
-			parent.fill(0);
+			parent.fill(txtColor);
 			parent.textAlign(parent.RIGHT, parent.TOP);
 			parent.text((String) me.getKey(), x - 4, y);
 			y += 20;

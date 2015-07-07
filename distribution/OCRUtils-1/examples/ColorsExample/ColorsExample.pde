@@ -56,63 +56,63 @@ void draw() {
   fill(cc);
   rect(500, 55, 40, 40);
 
-  color[] square = Colors.getSquare(a);
-  float x = 550;
-  float y = 55;
+  color[] newColors = Colors.getSquare(a);
+  float x = 500;
+  float y = 100;
   float ht = 20;
-  for (int i = 0; i < square.length; i++) {
-    fill(square[i]);
+  for (int i = 0; i < newColors.length; i++) {
+    fill(newColors[i]);
     rect(x, y, 50, ht);
     y += ht;
   }
 
 
-  square = Colors.getTetradic(a, 45);
-  x = 500;
-  y = 140;
-  ht = 20;
-  for (int i = 0; i < square.length; i++) {
-    fill(square[i]);
-    rect(x, y, 50, ht);
-    y += ht;
-  }
-
-  square = Colors.getTriadic(a);
-  x = 500;
-  y = 210;
-  ht = 20;
-  for (int i = 0; i < square.length; i++) {
-    fill(square[i]);
-    rect(x, y, 50, ht);
-    y += ht;
-  }
-
-  square = Colors.getSplitComplementary(a, 20);
+  newColors = Colors.getTetradic(a, 45);
   x = 550;
-  y = 210;
+  y = 100;
   ht = 20;
-  for (int i = 0; i < square.length; i++) {
-    fill(square[i]);
+  for (int i = 0; i < newColors.length; i++) {
+    fill(newColors[i]);
     rect(x, y, 50, ht);
     y += ht;
   }
 
-  square = Colors.getEvenDivisions(a, 10);
+  newColors = Colors.getTriadic(a);
   x = 500;
-  y = 280;
+  y = 185;
   ht = 20;
-  for (int i = 0; i < square.length; i++) {
-    fill(square[i]);
+  for (int i = 0; i < newColors.length; i++) {
+    fill(newColors[i]);
     rect(x, y, 50, ht);
     y += ht;
   }
 
-  square = Colors.getEvenDivisions(a, 10, -80);
+  newColors = Colors.getSplitComplementary(a, 20);
   x = 550;
-  y = 280;
+  y = 185;
   ht = 20;
-  for (int i = 0; i < square.length; i++) {
-    fill(square[i]);
+  for (int i = 0; i < newColors.length; i++) {
+    fill(newColors[i]);
+    rect(x, y, 50, ht);
+    y += ht;
+  }
+
+  newColors = Colors.getEvenDivisions(a, 10);
+  x = 500;
+  y = 250;
+  ht = 20;
+  for (int i = 0; i < newColors.length; i++) {
+    fill(newColors[i]);
+    rect(x, y, 50, ht);
+    y += ht;
+  }
+
+  newColors = Colors.getEvenDivisions(a, 10, -80);
+  x = 550;
+  y = 250;
+  ht = 20;
+  for (int i = 0; i < newColors.length; i++) {
+    fill(newColors[i]);
     rect(x, y, 50, ht);
     y += ht;
   }
@@ -145,6 +145,11 @@ void keyReleased() {
   }
   if (key == ' ') {
     loadColors();
+  }
+  if (key == 'a') {
+    if (myColors.size() > 0) {
+      myColors.get(0).addColor("ocean", color(0, 150, 255));
+    }
   }
 } // end keyReleased 
 

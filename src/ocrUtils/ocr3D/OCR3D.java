@@ -329,6 +329,77 @@ public class OCR3D extends OCRUtils {
 		}
 	} // end drawDottedLine
 
+	/**
+	 * This will draw a band.. essentially a filled arc made of faceted edges. Note that it will
+	 * always go clockwise. So mind the starting angle.
+	 * 
+	 * @param pg
+	 *            The PGraphics to draw on
+	 * @param x
+	 *            The x center point for the band
+	 * @param y
+	 *            The y center point for the band
+	 * @param innerRad
+	 *            The inner radius of the band
+	 * @param outerRad
+	 *            The outer radius of the band
+	 * @param startAngle
+	 *            The starting angle for the band in radians
+	 * @param endAngle
+	 *            The ending angle in radians
+	 * @param divisions
+	 *            How many divisions to split up the entire circle by. More =
+	 *            smoother/slower
+	 */
+	public static void drawBand(PGraphics pg, float x, float y, float innerRad, float outerRad, float startAngle, float endAngle, int divisions) {
+		// divisions are for the entire circle, so this portion will just ceil
+		// up to the required divisions
+		// assume it always goes clockwise
+		// adjust the end angle if it is before the startAngle
+		startAngle %= 2 * (float) Math.PI;
+		endAngle %= 2 * (float) Math.PI;
+		if (endAngle < startAngle) {
+			endAngle += 2 * (float) Math.PI;
+		}
+
+		float totalCircumference = outerRad * (float) Math.PI * 2;
+		float outerArcLength = totalCircumference * (endAngle - startAngle) / (2 * (float) Math.PI);
+		int divisionsToUse = PApplet.ceil(divisions * outerArcLength / totalCircumference);
+
+		float ptx, pty, thisAngle;
+
+		int manualBreakout = 100;
+		int breakoutCount = 0;
+		if (divisionsToUse <= 1) {
+			while (true) {
+				divisions = (int) (divisions * 1.05);
+				divisionsToUse = PApplet.ceil(divisions * outerArcLength / totalCircumference);
+				if (breakoutCount++ > manualBreakout || divisionsToUse > 1) {
+					break;
+				}
+			}
+		}
+		if (divisionsToUse <= 1)
+			System.err.println("Band not drawn, increase division count");
+
+		pg.beginShape();
+		// outerband
+		for (int i = 0; i < divisionsToUse; i++) {
+			thisAngle = PApplet.map(i, 0, divisionsToUse - 1, startAngle, endAngle);
+			ptx = x + outerRad * (float) Math.cos(thisAngle);
+			pty = y + outerRad * (float) Math.sin(thisAngle);
+			pg.vertex(ptx, pty);
+		}
+		// innerband
+		for (int i = divisionsToUse - 1; i >= 0; i--) {
+			thisAngle = PApplet.map(i, 0, divisionsToUse - 1, startAngle, endAngle);
+			ptx = x + innerRad * (float) Math.cos(thisAngle);
+			pty = y + innerRad * (float) Math.sin(thisAngle);
+			pg.vertex(ptx, pty);
+		}
+		pg.endShape(PConstants.CLOSE);
+	} // end drawBand
+
 	/*
 	 * // do this later.... public static void drawRectangle3Pt(PVector a,
 	 * PVector b, PVector c) { parent.beginShape(); vertex(a.x, a.y, a.z);
